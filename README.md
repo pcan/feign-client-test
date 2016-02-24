@@ -8,23 +8,30 @@ A few request types are supported at the moment:
 
 * Simple upload requests: One `MultipartFile` alongwith some path/query parameters:
 
-        ```java
-        @RequestLine("POST /upload/{folder}")
-        public UploadInfo upload(@Param("folder") String folder, @Param("file") MultipartFile file);
-        ```
+```java
+interface TestUpload {
+    @RequestLine("POST /upload/{folder}")
+    public UploadInfo upload(@Param("folder") String folder, @Param("file") MultipartFile file);
+}
+```
 
 * Upload one file & object(s): One `MultipartFile` alongwith some path/query parameters and one or more JSON-encoded object(s):
 
-        ```java
-        @RequestLine("POST /upload/{folder}")
-        public UploadInfo upload(@Param("folder") String folder, @Param("file") MultipartFile file, @Param("metadata") UploadMetadata metadata);
-        ```
+```java
+interface TestUpload {
+    @RequestLine("POST /upload/{folder}")
+    public UploadInfo upload(@Param("folder") String folder, @Param("file") MultipartFile file, @Param("metadata") UploadMetadata metadata);
+}
+```
+
 * Upload multiple files & objects: An array of `MultipartFile` alongwith some path/query parameters and one or more JSON-encoded object(s):
 
-        ```java
-        @RequestLine("POST /uploadArray/{folder}")
-        public List<UploadInfo> uploadArray(@Param("folder") String folder, @Param("files") MultipartFile[] files, @Param("metadata") UploadMetadata metadata);
-        ```
+```java
+interface TestUpload {
+    @RequestLine("POST /uploadArray/{folder}")
+    public List<UploadInfo> uploadArray(@Param("folder") String folder, @Param("files") MultipartFile[] files, @Param("metadata") UploadMetadata metadata);
+}
+```
 
 ## Usage
 
