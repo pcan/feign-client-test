@@ -5,6 +5,7 @@ import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -14,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -101,7 +102,7 @@ public class FeignSpringFormEncoder implements Encoder {
         HttpHeaders filePartHeaders = new HttpHeaders();
         filePartHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         try {
-            Resource multipartFileResource = new MultipartFileResource(file.getBytes(), file.getOriginalFilename());
+            Resource multipartFileResource = new MultipartFileResource(file.getOriginalFilename(), file.getSize(), file.getInputStream());
             return new HttpEntity<>(multipartFileResource, filePartHeaders);
         } catch (IOException ex) {
             throw new EncodeException("Cannot encode request.", ex);
@@ -121,7 +122,7 @@ public class FeignSpringFormEncoder implements Encoder {
         filePartHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         try {
             for (MultipartFile file : files) {
-                Resource multipartFileResource = new MultipartFileResource(file.getBytes(), file.getOriginalFilename());
+                Resource multipartFileResource = new MultipartFileResource(file.getOriginalFilename(), file.getSize(), file.getInputStream());
                 map.add(name, new HttpEntity<>(multipartFileResource, filePartHeaders));
             }
         } catch (IOException ex) {
@@ -174,6 +175,10 @@ public class FeignSpringFormEncoder implements Encoder {
                 template.header(entry.getKey(), entry.getValue());
             }
         }
+        /*
+        we should use a template output stream... this will cause issues if files are too big, 
+        since the whole request will be in memory.
+         */
         template.body(outputStream.toByteArray(), UTF_8);
     }
 
@@ -232,19 +237,32 @@ public class FeignSpringFormEncoder implements Encoder {
     /**
      * Dummy resource class. Wraps file content and its original name.
      */
-    static class MultipartFileResource extends ByteArrayResource {
+    static class MultipartFileResource extends InputStreamResource {
 
         private final String filename;
+        private final long size;
 
-        public MultipartFileResource(byte[] payload, String originalFileName) throws IOException {
-            super(payload);
-            this.filename = originalFileName;
+        public MultipartFileResource(String filename, long size, InputStream inputStream) {
+            super(inputStream);
+            this.size = size;
+            this.filename = filename;
         }
 
         @Override
         public String getFilename() {
             return this.filename;
         }
+
+        @Override
+        public InputStream getInputStream() throws IOException, IllegalStateException {
+            return super.getInputStream(); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public long contentLength() throws IOException {
+            return size;
+        }
+
     }
 
 }
