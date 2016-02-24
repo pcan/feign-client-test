@@ -33,7 +33,7 @@ interface TestUpload {
 }
 ```
 
-In order to build a Multipart file request I had to implement an in-memory [`MultipartFile` version](src/main/java/it/pcan/test/feign/client/InMemoryMultipartFile.java). This is only for testing purpose, the best thing to do is to write another version that wraps a FileInputStream so you won't load all the file content in memory before uploading it.
+In order to build a Multipart file request I had to implement an in-memory version of [`MultipartFile`](src/main/java/it/pcan/test/feign/client/InMemoryMultipartFile.java). This is only for testing purpose, the best thing to do is to write another version that wraps a FileInputStream so you won't load all the file content in memory before uploading it.
 
 ## Usage
 
