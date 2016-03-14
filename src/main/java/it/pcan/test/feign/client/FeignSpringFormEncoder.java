@@ -7,9 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +31,17 @@ import org.springframework.web.multipart.MultipartFile;
  * @author Pierantonio Cangianiello
  */
 public class FeignSpringFormEncoder implements Encoder {
+
+    private static final Map<String, ?> MAP_STRING_WILDCARD = null;
+    private static final Type FORM_TYPE;
+
+    static {
+        try {
+            FORM_TYPE = FeignSpringFormEncoder.class.getDeclaredField("MAP_STRING_WILDCARD").getGenericType();
+        } catch (NoSuchFieldException | SecurityException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     private final List<HttpMessageConverter<?>> converters = new RestTemplate().getMessageConverters();
     private final HttpHeaders multipartHeaders = new HttpHeaders();
@@ -217,21 +226,7 @@ public class FeignSpringFormEncoder implements Encoder {
      * @see feign.Types#MAP_STRING_WILDCARD
      */
     static boolean isFormRequest(Type type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) type;
-            Type[] actualTypeArguments = pt.getActualTypeArguments();
-            if (pt.getRawType() == Map.class && actualTypeArguments != null
-                    && actualTypeArguments.length == 2 && actualTypeArguments[0] == String.class
-                    && actualTypeArguments[1] instanceof WildcardType) {
-                WildcardType wt = (WildcardType) actualTypeArguments[1];
-                Type[] upperBounds = wt.getUpperBounds();
-                Type[] lowerBounds = wt.getLowerBounds();
-
-                return upperBounds != null && upperBounds.length == 1 && upperBounds[0] == Object.class
-                        && lowerBounds != null && lowerBounds.length == 0;
-            }
-        }
-        return false;
+        return FORM_TYPE.equals(type);
     }
 
     /**
