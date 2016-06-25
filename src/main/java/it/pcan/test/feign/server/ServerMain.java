@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,13 +30,13 @@ public class ServerMain {
 
     private int i = 0;
 
-    @RequestMapping(path = "/test", method = POST)
+    @RequestMapping(path = "/test", method = POST, consumes = "application/json")
     public HttpEntity<UploadInfo> upload(@RequestBody UploadMetadata metadata) {
         return ResponseEntity.ok(new UploadInfo(i++, 0, "dummy.tmp"));
     }
 
     @RequestMapping(path = "/upload/{folder}", method = POST)
-    public HttpEntity<UploadInfo> upload(@PathVariable String folder, @RequestPart MultipartFile file, @RequestPart UploadMetadata metadata) {
+    public HttpEntity<UploadInfo> upload(@PathVariable String folder, @RequestParam MultipartFile file, @RequestParam UploadMetadata metadata) {
         return ResponseEntity.ok(new UploadInfo(i++, file.getSize(), folder + "/" + file.getOriginalFilename()));
     }
 

@@ -32,16 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class FeignSpringFormEncoder implements Encoder {
 
-    private static final Map<String, ?> MAP_STRING_WILDCARD = null;
-    private static final Type FORM_TYPE;
-
-    static {
-        try {
-            FORM_TYPE = FeignSpringFormEncoder.class.getDeclaredField("MAP_STRING_WILDCARD").getGenericType();
-        } catch (NoSuchFieldException | SecurityException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
 
     private final List<HttpMessageConverter<?>> converters = new RestTemplate().getMessageConverters();
     private final HttpHeaders multipartHeaders = new HttpHeaders();
@@ -226,7 +216,7 @@ public class FeignSpringFormEncoder implements Encoder {
      * @see feign.Types#MAP_STRING_WILDCARD
      */
     static boolean isFormRequest(Type type) {
-        return FORM_TYPE.equals(type);
+        return MAP_STRING_WILDCARD.equals(type);
     }
 
     /**
