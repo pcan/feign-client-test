@@ -34,14 +34,10 @@ public class FeignSpringFormEncoder implements Encoder {
 
 
     private final List<HttpMessageConverter<?>> converters = new RestTemplate().getMessageConverters();
-    private final HttpHeaders multipartHeaders = new HttpHeaders();
-    private final HttpHeaders jsonHeaders = new HttpHeaders();
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     public FeignSpringFormEncoder() {
-        multipartHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
-        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
     }
 
     /**
@@ -50,8 +46,12 @@ public class FeignSpringFormEncoder implements Encoder {
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
         if (isFormRequest(bodyType)) {
-            encodeMultipartFormRequest((Map<String, ?>) object, template);
+            final HttpHeaders multipartHeaders = new HttpHeaders();
+            multipartHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+            encodeMultipartFormRequest((Map<String, ?>) object, multipartHeaders, template);
         } else {
+            final HttpHeaders jsonHeaders = new HttpHeaders();
+            jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
             encodeRequest(object, jsonHeaders, template);
         }
     }
@@ -64,7 +64,7 @@ public class FeignSpringFormEncoder implements Encoder {
      * @param template
      * @throws EncodeException
      */
-    private void encodeMultipartFormRequest(Map<String, ?> formMap, RequestTemplate template) throws EncodeException {
+    private void encodeMultipartFormRequest(Map<String, ?> formMap, HttpHeaders multipartHeaders, RequestTemplate template) throws EncodeException {
         if (formMap == null) {
             throw new EncodeException("Cannot encode request with null form.");
         }
